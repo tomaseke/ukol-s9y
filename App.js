@@ -15,13 +15,14 @@ export default function App() {
   const [movies, setMovies] = useState({});
   const [sort, setSort] = useState("ascending");
 
+  // smooth transition once sort is called
   function scrollToTop() {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
   }
-
+  // get movies into state variable
   useEffect(() => {
     fetch(
       "https://raw.githubusercontent.com/RyanHemrick/star_wars_movie_app/master/movies.json"
