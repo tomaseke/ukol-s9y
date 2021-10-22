@@ -1,0 +1,3 @@
+- Tested on expo-cli for web
+- Main is in the App.js
+- To start --> npm run web should work after dependencies are downloaded
