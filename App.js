@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,20 +7,27 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  SafeAreaView,
+  Platform,
 } from "react-native";
 import Episode from "./components/Episode";
 
 export default function App() {
+  const listRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [movies, setMovies] = useState({});
+  const [movies, setMovies] = useState([]);
   const [sort, setSort] = useState("ascending");
 
   // smooth transition once sort is called
   function scrollToTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    if (Platform.OS === "ios" || Platform.OS === "android") {
+      listRef.current.scrollTo({ x: 0, y: 0, animated: true });
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
   }
   // get movies into state variable
   useEffect(() => {
@@ -35,29 +42,28 @@ export default function App() {
   const renderItem = ({ item }) => <Episode episode={item} />;
 
   function sortListById() {
-    scrollToTop();
-    if (sort === "ascending") {
-      let sorted = movies.sort(function (obj1, obj2) {
+    const copiedMovies = [...movies];
+    console.log(listRef);
+    copiedMovies.sort((obj1, obj2) => {
+      if (sort === "ascending") {
         return obj2.episode_number - obj1.episode_number;
-      });
-      setSort("descending");
-      setMovies(sorted);
-    } else {
-      let sorted = movies.sort(function (obj1, obj2) {
+      } else {
         return obj1.episode_number - obj2.episode_number;
-      });
-      setSort("ascending");
-      setMovies(sorted);
-    }
+      }
+    });
+
+    setSort(sort === "ascending" ? "descending" : "ascending");
+    setMovies(copiedMovies);
+    scrollToTop();
   }
 
   return (
     <>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         {isLoading && <Text>Loading...</Text>}
 
         {!isLoading && (
-          <ScrollView>
+          <ScrollView ref={listRef}>
             <Text style={styles.heading}>Star Wars movies</Text>
             <FlatList
               data={movies}
@@ -74,7 +80,7 @@ export default function App() {
             </TouchableOpacity>
           </ScrollView>
         )}
-      </View>
+      </SafeAreaView>
     </>
   );
 }
